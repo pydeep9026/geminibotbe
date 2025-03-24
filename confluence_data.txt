@@ -1,0 +1,10 @@
+[
+  {
+    "title": "Installation Guide for SoftwareX",
+    "content": "# SoftwareX Installation\n## Prerequisites\n- Windows 10/11\n- Admin rights\n## Steps\n1. Download package\n2. Run installer\n3. Verify installation"
+  },
+  {
+    "title": "Enterprise SoftwareX Configuration",
+    "content": "# Enterprise Setup\n**Security Notes:**\n- Requires ports 443/8080\n- Approved version: 2.4.1"
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "ticket_id": "INC10001",
+    "solution": "**Solution for SoftwareX installation issues:**\n1. Check network connectivity\n2. Ensure antivirus is disabled\n3. Retry installation"
+  },
+  {
+    "ticket_id": "INC10002",
+    "solution": "**Solution for SoftwareX configuration issues:**\n1. Verify configuration file\n2. Restart service\n3. Check logs for errors"
+  }
+]

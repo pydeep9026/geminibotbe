@@ -1,124 +1,85 @@
 import os
-import random
-from datetime import datetime, timedelta
+import json
 import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
+from difflib import SequenceMatcher
 
 load_dotenv()
-
 app = Flask(__name__)
 CORS(app)
 
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+def load_data(file_path):
+    try:
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    except:
+        return []
 
-class FakeDataGenerator:
-    @staticmethod
-    def generate_confluence_results(query):
-        """Generate realistic fake Confluence pages"""
-        return [
-            {
-                "title": f"{query.capitalize()} Installation Guide",
-                "content": f"""# {query.capitalize()} Installation
-                ## Prerequisites
-                - Windows 10/11
-                - Admin rights
-                ## Steps
-                1. Download package
-                2. Run installer
-                3. Verify installation"""
-            },
-            {
-                "title": f"Enterprise {query.capitalize()} Config",
-                "content": f"""# Enterprise Setup
-                **Security Notes:**
-                - Requires ports 443/8080
-                - Approved version: 2.4.1"""
-            }
-        ]
+def is_query_relevant(query, data):
+    query_lower = query.lower()
+    for item in data:
+        title_match = SequenceMatcher(None, query_lower, item.get("title", "").lower()).ratio()
+        content_match = SequenceMatcher(None, query_lower, item.get("content", "").lower()).ratio()
+        if title_match > 0.6 or content_match > 0.6:
+            return True
+    return False
 
-    @staticmethod
-    def generate_remedy_results(query):
-        """Generate realistic fake Remedy tickets"""
-        return [
-            {
-                "ticket_id": "INC12345",
-                "solution": f"""**Solution for {query} issues:**
-                1. Found antivirus blocking
-                2. Added exception
-                3. Verified install"""
-            }
-        ]
+def filter_data(data, query):
+    query_lower = query.lower()
+    return [item for item in data if SequenceMatcher(None, query_lower, item.get("title", "").lower()).ratio() > 0.6 or SequenceMatcher(None, query_lower, item.get("content", "").lower()).ratio() > 0.6]
 
-class ITHelpChatbot:
-    def __init__(self):
-        self.fake = FakeDataGenerator()
+def filter_remedy(data, query):
+    query_lower = query.lower()
+    return [item for item in data if SequenceMatcher(None, query_lower, item.get("solution", "").lower()).ratio() > 0.6]
 
-    def generate_response(self, user_query):
-        """Get fake data, send to Gemini for summarization"""
-        # Get fake data
-        confluence_data = self.fake.generate_confluence_results(user_query)
-        remedy_data = self.fake.generate_remedy_results(user_query)
+def generate_prompt(query, confluence, remedy):
+    prompt = "You are an IT support assistant. Reformat the provided content without adding extra details. Use only the given information to structure the answer in clean markdown. Do not generate additional content.\n"
+    prompt += f"USER QUESTION: {query}\n"
+    prompt += f"CONFLUENCE DOCUMENTS: {json.dumps(confluence)}\n"
+    prompt += f"REMEDY TICKETS: {json.dumps(remedy)}\n"
+    prompt += "The response should include:\n1. Introduction\n2. Prerequisites (include **bold warnings** if applicable)\n3. Step-by-step instructions\n4. Troubleshooting\n"
+    return prompt
 
-        # Prepare Gemini prompt
-        prompt = f"""
-        You are an IT support assistant. Summarize and structure this information:
+def call_gemini_api(prompt):
+    GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+    headers = {"Content-Type": "application/json"}
+    params = {"key": GEMINI_API_KEY}
+    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+    try:
+        response = requests.post(GEMINI_API_URL, headers=headers, params=params, json=payload)
+        response.raise_for_status()
+        return response.json()['candidates'][0]['content']['parts'][0]['text']
+    except Exception as e:
+        return f"Error generating response: {str(e)}"
 
-        USER QUESTION: {user_query}
+def generate_response(query):
+    confluence_data = load_data("confluence_data.txt")
+    remedy_data = load_data("remedy_data.txt")
 
-        CONFLUENCE DOCUMENTS:
-        {confluence_data}
+    if not is_query_relevant(query, confluence_data):
+        return "Data not found"
 
-        REMEDY TICKETS:
-        {remedy_data}
+    filtered_confluence = filter_data(confluence_data, query)
+    filtered_remedy = filter_remedy(remedy_data, query)
+    
+    prompt = generate_prompt(query, filtered_confluence, filtered_remedy)
+    return call_gemini_api(prompt)
 
-        Provide response with:
-        1. Brief introduction
-        2. Prerequisites (bold warnings)
-        3. Step-by-step instructions
-        4. Troubleshooting (from Remedy)
-        5. Format in clean markdown
-        """
-
-        # Call Gemini API
-        headers = {'Content-Type': 'application/json'}
-        params = {'key': GEMINI_API_KEY}
-        payload = {
-            "contents": [{
-                "parts": [{"text": prompt}]
-            }]
-        }
-
-        try:
-            response = requests.post(
-                GEMINI_API_URL,
-                headers=headers,
-                params=params,
-                json=payload
-            )
-            response.raise_for_status()
-            return response.json()['candidates'][0]['content']['parts'][0]['text']
-        except Exception as e:
-            return f"Error generating response: {str(e)}"
-
-@app.route('/api/chat', methods=['POST'])
+@app.route("/api/chat", methods=["POST"])
 def chat():
     data = request.json
-    user_query = data.get('query', '')
-    
-    if not user_query:
-        return jsonify({'error': 'No query provided'}), 400
-    
-    chatbot = ITHelpChatbot()
+    query = data.get("query", "")
+    if not query:
+        return jsonify({"error": "No query provided"}), 400
     try:
-        response = chatbot.generate_response(user_query)
-        return jsonify({'response': response})
+        response = generate_response(query)
+        return jsonify({"response": response})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
