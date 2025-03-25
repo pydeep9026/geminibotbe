@@ -5,6 +5,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from difflib import SequenceMatcher
+from bs4 import BeautifulSoup
+import re
 
 load_dotenv()
 app = Flask(__name__)
@@ -13,33 +15,113 @@ CORS(app)
 def load_data(file_path):
     try:
         with open(file_path, 'r') as f:
-            return json.load(f)
-    except:
+            if file_path == "confluence_data.txt":
+                data = json.loads(f.read())
+                return [{
+                    "id": item.get("id", ""),
+                    "title": item.get("title", ""),
+                    "content": BeautifulSoup(item.get("body", {}).get("storage", {}).get("value", ""), "html.parser").get_text(),
+                    "labels": [label["name"] for label in item.get("labels", {}).get("results", [])],
+                    "status": item.get("status", "")
+                } for item in data]
+            elif file_path == "remedy_data.txt":
+                data = json.loads(f.read())
+                return [{
+                    "ticketId": item.get("ticketId", ""),
+                    "title": item.get("title", ""),
+                    "solution": item.get("solution", {}).get("text", ""),
+                    "workaround": item.get("solution", {}).get("workaround", ""),
+                    "category": item.get("category", ""),
+                    "status": item.get("status", "")
+                } for item in data]
+    except Exception as e:
+        print(f"Error loading {file_path}: {str(e)}")
         return []
+    
 
-def is_query_relevant(query, data):
-    query_lower = query.lower()
-    for item in data:
-        title_match = SequenceMatcher(None, query_lower, item.get("title", "").lower()).ratio()
-        content_match = SequenceMatcher(None, query_lower, item.get("content", "").lower()).ratio()
-        if title_match > 0.6 or content_match > 0.6:
-            return True
+def is_id_match(query, item):
+    # Check Confluence ID
+    if "id" in item and query.lower() == item["id"].lower():
+        return True
+    # Check Remedy ticket ID
+    if "ticketId" in item and query.lower() == item["ticketId"].lower():
+        return True
     return False
 
-def filter_data(data, query):
-    query_lower = query.lower()
-    return [item for item in data if SequenceMatcher(None, query_lower, item.get("title", "").lower()).ratio() > 0.6 or SequenceMatcher(None, query_lower, item.get("content", "").lower()).ratio() > 0.6]
 
-def filter_remedy(data, query):
-    query_lower = query.lower()
-    return [item for item in data if SequenceMatcher(None, query_lower, item.get("solution", "").lower()).ratio() > 0.6]
 
-def generate_prompt(query, confluence, remedy):
-    prompt = "You are an IT support assistant. Reformat the provided content without adding extra details. Use only the given information to structure the answer in clean markdown. Do not generate additional content.\n"
-    prompt += f"USER QUESTION: {query}\n"
-    prompt += f"CONFLUENCE DOCUMENTS: {json.dumps(confluence)}\n"
-    prompt += f"REMEDY TICKETS: {json.dumps(remedy)}\n"
-    prompt += "The response should include:\n1. Introduction\n2. Prerequisites (include **bold warnings** if applicable)\n3. Step-by-step instructions\n4. Troubleshooting\n"
+def calculate_relevance_score(query, item):
+
+    if is_id_match(query, item):
+        return 1.0 
+
+    query_lower = query.lower()
+    query_words = set(re.findall(r'\w+', query_lower))
+    
+    # Title match (50% weight)
+    title = item.get("title", "").lower()
+    title_words = set(re.findall(r'\w+', title))
+    title_score = SequenceMatcher(None, query_lower, title).ratio() * 0.5
+    
+    # Label match (30% weight)
+    label_score = 0
+    for label in item.get("labels", []):
+        label_score += SequenceMatcher(None, query_lower, label.lower()).ratio()
+    label_score = min(label_score * 0.3, 0.3)
+    
+    # Content match (20% weight)
+    content = item.get("content", "").lower() if "content" in item else item.get("solution", "").lower()
+    content_score = 0
+    for word in query_words:
+        content_score += content.count(word) * 0.01
+    content_score = min(content_score, 0.2)
+    
+    return title_score + label_score + content_score
+
+def filter_and_sort_data(data, query, threshold=0.5):
+    if not data:
+        return []
+    
+    scored_items = []
+    for item in data:
+        score = calculate_relevance_score(query, item)
+        if score >= threshold:
+            scored_items.append((item, score))
+    
+    scored_items.sort(key=lambda x: x[1], reverse=True)
+    return [item[0] for item in scored_items if item[1] >= threshold]
+
+def generate_prompt(query, confluence_results, remedy_results):
+    prompt = """You are an IT support assistant. Structure the answer using ONLY the provided reference materials.
+Format the response in clean markdown without adding external information.
+
+USER QUESTION: {query}
+
+REFERENCE MATERIALS:
+""".format(query=query)
+
+    if confluence_results:
+        prompt += "\nCONFLUENCE DOCUMENTS (Source IDs: {confluence_ids}):\n{confluence_data}\n".format(
+            confluence_ids=", ".join([doc.get("id", "N/A") for doc in confluence_results]),
+            confluence_data=json.dumps([{"title": doc.get("title"), "content": doc.get("content")} for doc in confluence_results], indent=2)
+        )
+    
+    if remedy_results:
+        prompt += "\nREMEDY TICKETS (Ticket IDs: {remedy_ids}):\n{remedy_data}\n".format(
+            remedy_ids=", ".join([ticket.get("ticketId", "N/A") for ticket in remedy_results]),
+            remedy_data=json.dumps([{"title": ticket.get("title"), "solution": ticket.get("solution")} for ticket in remedy_results], indent=2)
+        )
+
+    prompt += """
+RESPONSE FORMAT:
+1. **Introduction** (Briefly state what this covers)
+2. **Prerequisites** (List requirements in bullet points)
+3. **Steps** (Numbered instructions)
+4. **Troubleshooting** (Common issues and fixes)
+5. **Sources** (List document IDs used)
+
+IMPORTANT: If no relevant information exists, respond only with: "No results found for this query."
+"""
     return prompt
 
 def call_gemini_api(prompt):
@@ -58,12 +140,12 @@ def call_gemini_api(prompt):
 def generate_response(query):
     confluence_data = load_data("confluence_data.txt")
     remedy_data = load_data("remedy_data.txt")
-
-    if not is_query_relevant(query, confluence_data):
-        return "Data not found"
-
-    filtered_confluence = filter_data(confluence_data, query)
-    filtered_remedy = filter_remedy(remedy_data, query)
+    
+    filtered_confluence = filter_and_sort_data(confluence_data, query)
+    filtered_remedy = filter_and_sort_data(remedy_data, query)
+    
+    if not filtered_confluence and not filtered_remedy:
+        return "No results found for this query."
     
     prompt = generate_prompt(query, filtered_confluence, filtered_remedy)
     return call_gemini_api(prompt)

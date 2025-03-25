@@ -1,10 +1,50 @@
 [
   {
-    "ticket_id": "INC10001",
-    "solution": "**Solution for SoftwareX installation issues:**\n1. Check network connectivity\n2. Ensure antivirus is disabled\n3. Retry installation"
+    "ticketId": "INC-54321",
+    "status": "Closed",
+    "createdDate": "2024-03-10T08:12:34Z",
+    "lastModified": "2024-03-10T10:45:21Z",
+    "category": "Network",
+    "subcategory": "VPN",
+    "title": "Cannot connect to corporate VPN",
+    "solution": {
+      "text": "1. Verify AnyConnect client is v4.10 or higher\n2. Check system clock is synchronized\n3. Clear cached credentials in AnyConnect settings\n4. Disable IPv6 in network adapter settings",
+      "workaround": "Use web VPN at vpnweb.company.com as temporary solution"
+    },
+    "resolutionCode": "Workaround Provided",
+    "affectedItem": "Cisco AnyConnect",
+    "technician": "tech-john.doe"
   },
   {
-    "ticket_id": "INC10002",
-    "solution": "**Solution for SoftwareX configuration issues:**\n1. Verify configuration file\n2. Restart service\n3. Check logs for errors"
+    "ticketId": "INC-54322",
+    "status": "Resolved",
+    "createdDate": "2024-03-12T14:30:15Z",
+    "lastModified": "2024-03-12T15:20:43Z",
+    "category": "Account",
+    "subcategory": "Password",
+    "title": "Password reset not working",
+    "solution": {
+      "text": "1. Verify user is not locked in Active Directory\n2. Check password doesn't match last 5 passwords\n3. Ensure special characters aren't from blocked set (!@#$ required)\n4. Clear browser cache if form submission fails",
+      "workaround": "Temporary password set with forced change at next login"
+    },
+    "resolutionCode": "Root Cause Fixed",
+    "affectedItem": "Password Portal",
+    "technician": "tech-sarah.connor"
+  },
+  {
+    "ticketId": "INC-54323",
+    "status": "Open",
+    "createdDate": "2024-03-14T09:05:22Z",
+    "lastModified": "2024-03-14T09:30:18Z",
+    "category": "Hardware",
+    "subcategory": "Laptop",
+    "title": "New laptop setup request",
+    "solution": {
+      "text": "Standard imaging process:\n1. Collect from IT with signed asset form\n2. Power on and connect to wired network\n3. Login with temporary credentials\n4. Run Software Center updates\n5. Install department-specific packages",
+      "workaround": null
+    },
+    "resolutionCode": "Standard Procedure",
+    "affectedItem": "Dell Latitude 5540",
+    "technician": "tech-mike.jones"
   }
 ]

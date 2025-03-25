@@ -1,10 +1,201 @@
 [
   {
-    "title": "Installation Guide for SoftwareX",
-    "content": "# SoftwareX Installation\n## Prerequisites\n- Windows 10/11\n- Admin rights\n## Steps\n1. Download package\n2. Run installer\n3. Verify installation"
+    "id": "CONF-1001",
+    "status": "current",
+    "title": "VPN Setup Guide for Employees",
+    "spaceId": "ITDOCS",
+    "createdAt": "2024-03-01T09:00:00Z",
+    "version": {
+      "number": 3,
+      "createdAt": "2024-03-15T14:30:00Z",
+      "authorId": "user-123"
+    },
+    "body": {
+      "storage": {
+        "value": "<h1>Employee VPN Configuration</h1><h2>Prerequisites</h2><ul><li>Company-issued laptop</li><li>Active directory credentials</li><li>2FA authenticator app installed</li></ul><h2>Installation Steps</h2><ol><li>Download Cisco AnyConnect from the IT portal</li><li>Run the installer with admin privileges</li><li>Connect to vpn.company.com</li><li>Enter your AD credentials when prompted</li></ol><h2>Troubleshooting</h2><p>If connection fails, verify your 2FA token is current.</p>",
+        "representation": "storage"
+      }
+    },
+    "labels": {
+      "results": [
+        {"name": "vpn"},
+        {"name": "network"},
+        {"name": "how-to"}
+      ]
+    }
   },
   {
-    "title": "Enterprise SoftwareX Configuration",
-    "content": "# Enterprise Setup\n**Security Notes:**\n- Requires ports 443/8080\n- Approved version: 2.4.1"
+    "id": "CONF-1002",
+    "status": "current",
+    "title": "Password Reset Policy",
+    "spaceId": "HRDOCS",
+    "createdAt": "2024-01-10T13:45:00Z",
+    "version": {
+      "number": 5,
+      "createdAt": "2024-02-28T10:15:00Z",
+      "authorId": "user-456"
+    },
+    "body": {
+      "storage": {
+        "value": "<h1>Password Requirements</h1><ul><li>Minimum 12 characters</li><li>Must contain uppercase, lowercase, number and special character</li><li>90-day expiration policy</li></ul><h1>Reset Process</h1><ol><li>Visit password.company.com</li><li>Verify identity with 2FA</li><li>Enter current password</li><li>Set new password meeting requirements</li></ol><p><strong>Note:</strong> Locked accounts require helpdesk ticket.</p>",
+        "representation": "storage"
+      }
+    },
+    "labels": {
+      "results": [
+        {"name": "security"},
+        {"name": "authentication"},
+        {"name": "policy"}
+      ]
+    }
+  },
+  {
+    "id": "CONF-1003",
+    "status": "archived",
+    "title": "Legacy Email Client Configuration",
+    "spaceId": "ITDOCS",
+    "createdAt": "2023-06-15T11:20:00Z",
+    "version": {
+      "number": 2,
+      "createdAt": "2023-08-01T16:40:00Z",
+      "authorId": "user-789"
+    },
+    "body": {
+      "storage": {
+        "value": "<h1>Outlook 2013 Configuration</h1><p><em>Note: This client is no longer supported</em></p><ol><li>Open Control Panel</li><li>Select Mail > Show Profiles</li><li>Enter exchange.company.com as server</li></ol>",
+        "representation": "storage"
+      }
+    },
+    "labels": {
+      "results": [
+        {"name": "deprecated"},
+        {"name": "email"}
+      ]
+    }
+  },
+  {
+  "id": "CONF-1004",
+  "status": "current",
+  "title": "Microsoft Office 365 Installation Guide",
+  "spaceId": "ITDOCS",
+  "createdAt": "2024-02-10T08:30:00Z",
+  "version": {
+    "number": 4,
+    "createdAt": "2024-03-05T11:20:00Z",
+    "authorId": "user-101"
+  },
+  "body": {
+    "storage": {
+      "value": "<h1>Office 365 ProPlus Installation</h1><h2>Requirements</h2><ul><li>Windows 10/11 or macOS 10.15+</li><li>4GB RAM minimum</li><li>Admin rights for installation</li></ul><h2>Installation Steps</h2><ol><li>Login to portal.office.com</li><li>Select 'Install Office'</li><li>Run downloaded installer</li><li>Authenticate with company email</li></ol><h2>Known Issues</h2><p><strong>Error 30015-39:</strong> Uninstall previous versions first using <a href='https://support.microsoft.com/office'>Microsoft's cleanup tool</a></p>",
+      "representation": "storage"
+    }
+  },
+  "labels": {
+    "results": [
+      {"name": "office365"},
+      {"name": "installation"},
+      {"name": "microsoft"}
+    ]
   }
+},
+{
+  "id": "CONF-1005",
+  "status": "current",
+  "title": "Network Printer Troubleshooting",
+  "spaceId": "ITDOCS",
+  "createdAt": "2024-01-05T14:15:00Z",
+  "version": {
+    "number": 7,
+    "createdAt": "2024-03-18T09:45:00Z",
+    "authorId": "user-202"
+  },
+  "body": {
+    "storage": {
+      "value": "<h1>HP LaserJet Enterprise Troubleshooting</h1><h2>Common Issues</h2><table><tr><th>Symptom</th><th>Solution</th></tr><tr><td>'Printer Offline'</td><td>1. Restart print spooler service<br>2. Reinstall TCP/IP port</td></tr><tr><td>Authentication failures</td><td>1. Clear Kerberos tickets<br>2. Update printer firmware</td></tr></table><h2>Driver Installation</h2><p>Always use <a href='http://itportal/printers'>corporate driver package</a> (v5.2.3+)</p>",
+      "representation": "storage"
+    }
+  },
+  "labels": {
+    "results": [
+      {"name": "printer"},
+      {"name": "troubleshooting"},
+      {"name": "how-to"}
+    ]
+  }
+},
+{
+  "id": "CONF-1006",
+  "status": "current",
+  "title": "Outlook 2019/365 Configuration Guide",
+  "spaceId": "ITDOCS",
+  "createdAt": "2023-11-20T10:00:00Z",
+  "version": {
+    "number": 6,
+    "createdAt": "2024-02-28T16:20:00Z",
+    "authorId": "user-303"
+  },
+  "body": {
+    "storage": {
+      "value": "<h1>Autodiscover Setup</h1><ol><li>Launch Outlook</li><li>Enter email address (first.last@company.com)</li><li>Select 'Work or School Account'</li><li>Authenticate via SSO</li></ol><h2>Manual Configuration</h2><p>If autodiscover fails:</p><ul><li>Server: outlook.office365.com</li><li>Requires modern authentication (MFA)</li><li>Port: 993 (IMAP) or 587 (SMTP)</li></ul>",
+      "representation": "storage"
+    }
+  },
+  "labels": {
+    "results": [
+      {"name": "outlook"},
+      {"name": "email"},
+      {"name": "configuration"}
+    ]
+  }
+},
+{
+  "id": "CONF-1007",
+  "status": "current",
+  "title": "macOS VPN Connectivity Issues",
+  "spaceId": "ITDOCS",
+  "createdAt": "2024-03-05T13:40:00Z",
+  "version": {
+    "number": 2,
+    "createdAt": "2024-03-12T15:10:00Z",
+    "authorId": "user-404"
+  },
+  "body": {
+    "storage": {
+      "value": "<h1>Common Mac VPN Problems</h1><h2>1. IKEv2 Connection Drops</h2><ul><li>Disable 'Use default gateway' in advanced settings</li><li>Set MTU to 1400 in Terminal: <code>sudo ifconfig en0 mtu 1400</code></li></ul><h2>2. Authentication Failures</h2><ol><li>Delete all VPN configurations</li><li>Remove cached credentials from Keychain</li><li>Recreate connection with new certificate</li></ol>",
+      "representation": "storage"
+    }
+  },
+  "labels": {
+    "results": [
+      {"name": "vpn"},
+      {"name": "macos"},
+      {"name": "troubleshooting"}
+    ]
+  }
+},
+{
+  "id": "CONF-1008",
+  "status": "current",
+  "title": "IT Onboarding Checklist - New Hires",
+  "spaceId": "HRDOCS",
+  "createdAt": "2024-01-01T09:00:00Z",
+  "version": {
+    "number": 3,
+    "createdAt": "2024-03-01T08:15:00Z",
+    "authorId": "user-505"
+  },
+  "body": {
+    "storage": {
+      "value": "<h1>Day 1 Setup</h1><h2>Required Systems</h2><ul><li>Active Directory account</li><li>Email provisioning</li><li>VPN access request</li><li>Hardware assignment</li></ul><h2>Software to Install</h2><ol><li>Microsoft Office Suite</li><li>Corporate antivirus</li><li>Department-specific tools</li><li>Password manager</li></ol><h2>Training</h2><p>Complete within first week:<br>- Security awareness<br>- Data protection policy<br>- IT helpdesk procedures</p>",
+      "representation": "storage"
+    }
+  },
+  "labels": {
+    "results": [
+      {"name": "onboarding"},
+      {"name": "checklist"},
+      {"name": "hr"}
+    ]
+  }
+}
 ]
